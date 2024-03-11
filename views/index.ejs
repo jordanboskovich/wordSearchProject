@@ -13,18 +13,12 @@
       height: 30px;
       text-align: center;
       vertical-align: middle;
-      cursor: pointer; /* Indicates clickable items */
+      cursor: pointer;
+      transition: background-color 0.3s ease;
     }
-    .word-search-grid td a {
-      display: block;
-      width: 100%;
-      height: 100%;
-      color: black; /* Ensures text color is consistent */
-      text-decoration: none; /* Removes underline from links */
-    }
-    /* Optional: hover effect for grid cells */
-    .word-search-grid td a:hover {
-      background-color: #f0f0f0;
+    .selected {
+      background-color: #007bff;
+      color: white;
     }
   </style>
 </head>
@@ -33,7 +27,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-6">
-        <h2>Word List ahhahahaha: </h2>
+        <h2>Word List:</h2>
         <ul class="word-list">
           <% data.forEach(function(data) { %>
             <li><%= data.word %></li>
@@ -43,49 +37,61 @@
       <div class="col-md-6">
         <h2>Word Search Grid:</h2>
         <table class="word-search-grid">
-          <% grid.forEach(function(row) { %>
+          <% grid.forEach(function(row, rowIndex) { %>
             <tr>
-              <% row.forEach(function(cell) { %>
-                <td>
-                  <!-- Wrap each cell content within an anchor tag -->
-                  <a href="#" onclick="alert('Clicked on <%= cell %>');"><%= cell %></a>
-                </td>
+              <% row.forEach(function(cell, cellIndex) { %>
+                <td onclick="selectLetter(this, '<%= cell %>', <%= rowIndex %>, <%= cellIndex %>)" 
+                    id="cell-<%= rowIndex %>-<%= cellIndex %>"><%= cell %></td>
               <% }) %>
             </tr>
           <% }) %>
         </table>
       </div>
     </div>
+    <button onclick="submitWord()">Submit</button>
+    <button onclick="clearSelection()">Clear</button>
   </div>
+  <script>
+    let selectedLetters = '';
+    let lastSelectedCell = null;
+
+    function isNeighbor(rowIndex, cellIndex) {
+      if (lastSelectedCell === null) return true;
+      const [lastRow, lastCell] = lastSelectedCell;
+      const rowDiff = Math.abs(lastRow - rowIndex);
+      const cellDiff = Math.abs(lastCell - cellIndex);
+      return rowDiff <= 1 && cellDiff <= 1;
+    }
+
+    function selectLetter(cell, letter, rowIndex, cellIndex) {
+      if (isNeighbor(rowIndex, cellIndex) || selectedLetters.length === 0) {
+        if (cell.classList.contains('selected')) {
+          cell.classList.remove('selected');
+          selectedLetters = selectedLetters.replace(letter, '');
+        } else {
+          cell.classList.add('selected');
+          selectedLetters += letter;
+          lastSelectedCell = [rowIndex, cellIndex];
+        }
+        console.log(selectedLetters);
+      }
+    }
+
+    async function submitWord() {
+      console.log("Submitting:", selectedLetters);
+      // Implement submission logic here...
+      // Reset after submission for demonstration
+      selectedLetters = '';
+      lastSelectedCell = null;
+      document.querySelectorAll('.selected').forEach(cell => cell.classList.remove('selected'));
+    }
+
+    function clearSelection() {
+      selectedLetters = '';
+      lastSelectedCell = null;
+      document.querySelectorAll('.selected').forEach(cell => cell.classList.remove('selected'));
+      console.log("Cleared selection");
+    }
+  </script>
 </body>
 </html>
-<!-- Add this script inside your index.ejs within the <head> or just before closing the <body> -->
-<script>
-  let selectedLetters = '';
-
-  function selectLetter(letter) {
-    selectedLetters += letter;
-    document.getElementById('selectedWord').value = selectedLetters;
-  }
-
-  async function submitWord() {
-    const selectedWord = document.getElementById('selectedWord').value;
-    // Simple fetch request to send the selectedWord to the server
-    const response = await fetch('/submit-selection', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ selectedWord }),
-    });
-    const data = await response.json();
-    alert(data.message); // Simple way to show feedback
-    if (data.success) {
-      // Reset for the next selection
-      selectedLetters = '';
-      document.getElementById('selectedWord').value = '';
-      // Update the UI as necessary to reflect the word bank change
-    }
-  }
-</script>
-
