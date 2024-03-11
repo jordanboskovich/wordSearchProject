@@ -15,17 +15,23 @@ const generateGrid = (words) => {
 
   // Place words in the grid
   words.forEach((word) => {
-    const direction = Math.random() > 0.5 ? 'horizontal' : 'vertical';
+    // Randomly choose direction: 0 for horizontal, 1 for vertical, 2 for diagonal
+    const direction = Math.floor(Math.random() * 3);
     const startRow = Math.floor(Math.random() * (15 - word.length + 1));
     const startCol = Math.floor(Math.random() * (15 - word.length + 1));
 
-    if (direction === 'horizontal') {
+    if (direction === 0) { // Horizontal
       for (let i = 0; i < word.length; i++) {
         grid[startRow][startCol + i] = word[i].toUpperCase();
       }
-    } else {
+    } else if (direction === 1) { // Vertical
       for (let i = 0; i < word.length; i++) {
         grid[startRow + i][startCol] = word[i].toUpperCase();
+      }
+    } else { // Diagonal
+      // Ensure there's enough space diagonally; adjust startRow/startCol if necessary
+      for (let i = 0; i < word.length; i++) {
+        grid[startRow + i][startCol + i] = word[i].toUpperCase();
       }
     }
   });
