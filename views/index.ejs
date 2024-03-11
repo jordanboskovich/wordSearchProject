@@ -1,0 +1,49 @@
+<!-- index.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Word Search</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Add custom styles here */
+    .word-list {
+      margin-bottom: 20px;
+    }
+    .word-search-grid td {
+      width: 30px;
+      height: 30px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+ <br><br><br>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <h2>Word List:</h2>
+        <ul class="word-list">
+          <% data.forEach(function(data) { %>
+            <li><%= data.word %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h2>Word Search Grid:</h2>
+        <table class="word-search-grid">
+          <% grid.forEach(function(row) { %>
+            <tr>
+              <% row.forEach(function(cell) { %>
+                <td><%= cell %></td>
+              <% }) %>
+            </tr>
+          <% }) %>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
