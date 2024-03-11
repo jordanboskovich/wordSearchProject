@@ -47,6 +47,13 @@
           <% }) %>
         </table>
       </div>
+  <!-- Form for searching words -->
+  <div class="row align-items-end">
+    <div class="col-sm-9">
+      <input type="text" class="form-control" id="word" name="word" placeholder="Type a word" form="wordSearchForm">
+    </div>
+    <div class="col-sm-3">
+      <button type="submit" class="btn btn-primary" form="wordSearchForm">Search</button>
     </div>
     <button onclick="submitWord()">Submit</button>
     <button onclick="clearSelection()">Clear</button>
