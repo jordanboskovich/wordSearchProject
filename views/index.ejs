@@ -1,14 +1,10 @@
-<!-- index.ejs -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Word Search</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="styles.css">
   <style>
-    /* Add custom styles here */
     .word-list {
       margin-bottom: 20px;
     }
@@ -16,6 +12,19 @@
       width: 30px;
       height: 30px;
       text-align: center;
+      vertical-align: middle;
+      cursor: pointer; /* Indicates clickable items */
+    }
+    .word-search-grid td a {
+      display: block;
+      width: 100%;
+      height: 100%;
+      color: black; /* Ensures text color is consistent */
+      text-decoration: none; /* Removes underline from links */
+    }
+    /* Optional: hover effect for grid cells */
+    .word-search-grid td a:hover {
+      background-color: #f0f0f0;
     }
   </style>
 </head>
@@ -24,7 +33,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-6">
-        <h2>Word List:</h2>
+        <h2>Word List ahhahahaha: </h2>
         <ul class="word-list">
           <% data.forEach(function(data) { %>
             <li><%= data.word %></li>
@@ -37,7 +46,10 @@
           <% grid.forEach(function(row) { %>
             <tr>
               <% row.forEach(function(cell) { %>
-                <td><%= cell %></td>
+                <td>
+                  <!-- Wrap each cell content within an anchor tag -->
+                  <a href="#" onclick="alert('Clicked on <%= cell %>');"><%= cell %></a>
+                </td>
               <% }) %>
             </tr>
           <% }) %>
@@ -47,3 +59,33 @@
   </div>
 </body>
 </html>
+<!-- Add this script inside your index.ejs within the <head> or just before closing the <body> -->
+<script>
+  let selectedLetters = '';
+
+  function selectLetter(letter) {
+    selectedLetters += letter;
+    document.getElementById('selectedWord').value = selectedLetters;
+  }
+
+  async function submitWord() {
+    const selectedWord = document.getElementById('selectedWord').value;
+    // Simple fetch request to send the selectedWord to the server
+    const response = await fetch('/submit-selection', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ selectedWord }),
+    });
+    const data = await response.json();
+    alert(data.message); // Simple way to show feedback
+    if (data.success) {
+      // Reset for the next selection
+      selectedLetters = '';
+      document.getElementById('selectedWord').value = '';
+      // Update the UI as necessary to reflect the word bank change
+    }
+  }
+</script>
+
