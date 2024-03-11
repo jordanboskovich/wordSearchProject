@@ -41,7 +41,7 @@ const generateGrid = (words) => {
 
 export const renderPage = async (req, res) => {
   try {
-    let word = "water";
+    const word = req.query.word;
     const response = await fetch(`https://api.datamuse.com/words?ml=${word}`);
     let data = await response.json();
 
