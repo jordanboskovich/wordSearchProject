@@ -41,19 +41,24 @@ const generateGrid = (words) => {
 
 export const renderPage = async (req, res) => {
   try {
-    const word = req.query.word;
-    const response = await fetch(`https://api.datamuse.com/words?ml=${word}`);
-    let data = await response.json();
+    const word = req.query.word || 'defaultWord'; // Use a default word if none is provided
+    const response = await fetch(`https://api.datamuse.com/words?ml=${encodeURIComponent(word)}`);
+    if (!response.ok) throw new Error('Failed to fetch words.'); // Check response status
 
+    let data = await response.json();
     data = data.slice(0, 10);
     console.log(data);
+
+    if (data.length === 0) throw new Error('Word is invalid or no related words found.'); // Validate data
 
     const grid = generateGrid(data.map((item) => item.word));
     console.log(grid);
 
-    res.render('index', { data, grid });
+    res.render('index', { data, grid, error: null }); // Pass null for error when successful
   } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).send('Error fetching data');
+    console.error("Error:", error);
+    // Render the same page but with an error message
+    res.render('index', { data: [], grid: [], error: error.message });
   }
 };
+

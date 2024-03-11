@@ -31,32 +31,48 @@
 <body>
  <br><br><br>
   <div class="container">
-    <div class="row">
-      <div class="col-md-6">
-        <h2>Word List ahhahahaha: </h2>
-        <ul class="word-list">
-          <% data.forEach(function(data) { %>
-            <li><%= data.word %></li>
-          <% }) %>
-        </ul>
-      </div>
-      <div class="col-md-6">
-        <h2>Word Search Grid:</h2>
-        <table class="word-search-grid">
-          <% grid.forEach(function(row) { %>
-            <tr>
-              <% row.forEach(function(cell) { %>
-                <td>
-                  <!-- Wrap each cell content within an anchor tag -->
-                  <a href="#" onclick="alert('Clicked on <%= cell %>');"><%= cell %></a>
-                </td>
-              <% }) %>
-            </tr>
-          <% }) %>
-        </table>
-      </div>
+  <!-- Form for searching words -->
+  <div class="row align-items-end">
+    <div class="col-sm-9">
+      <input type="text" class="form-control" id="word" name="word" placeholder="Type a word" form="wordSearchForm">
+    </div>
+    <div class="col-sm-3">
+      <button type="submit" class="btn btn-primary" form="wordSearchForm">Search</button>
     </div>
   </div>
+  <!-- Flash Message for Errors -->
+  <% if (error) { %>
+  <div class="alert alert-danger mt-2" role="alert">
+    <%= error %>
+  </div>
+  <% } %>
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <h2>Word List:</h2>
+      <ul class="word-list">
+        <% data.forEach(function(dataItem) { %>
+        <li><%= dataItem.word %></li>
+        <% }) %>
+      </ul>
+    </div>
+    <div class="col-md-6">
+      <h2>Word Search Grid:</h2>
+      <table class="word-search-grid">
+        <% grid.forEach(function(row) { %>
+        <tr>
+          <% row.forEach(function(cell) { %>
+          <td>
+            <a href="#" onclick="alert('Clicked on <%= cell %>');"><%= cell %></a>
+          </td>
+          <% }) %>
+        </tr>
+        <% }) %>
+      </table>
+    </div>
+  </div>
+</div>
+<form id="wordSearchForm" action="/" method="get" class="d-none"></form>
+
 </body>
 </html>
 <!-- Add this script inside your index.ejs within the <head> or just before closing the <body> -->
