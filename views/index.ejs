@@ -29,6 +29,20 @@
 <body>
  <br><br><br>
   <div class="container">
+   <div class="row align-items-end">
+      <div class="col-sm-9">
+        <input type="text" class="form-control" id="word" name="word" placeholder="Type a word" form="wordSearchForm">
+      </div>
+      <div class="col-sm-3">
+        <button type="submit" class="btn btn-primary" form="wordSearchForm">Search</button>
+      </div>
+    </div>
+    <!-- Flash Message for Errors -->
+    <% if (error) { %>
+    <div class="alert alert-danger mt-2" role="alert">
+      <%= error %>
+    </div>
+    <% } %>
     <div class="row">
       <div class="col-md-6">
         <h2>Word List:</h2>
@@ -55,7 +69,7 @@
       </div>
     </div>
   </div>
-
+<form id="wordSearchForm" action="/" method="get" class="d-none"></form>
   <script>
   let selectedLetters = '';
   let selectedPositions = []; // Keeps track of the row and column indices of selected letters
