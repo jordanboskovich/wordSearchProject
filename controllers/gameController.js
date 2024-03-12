@@ -38,24 +38,21 @@ const generateGrid = (words) => {
 };
 
 export const renderPage = async (req, res) => {
-  try {
-    const word = req.query.word || 'water'; // Use a default word if none is provided
-    const response = await fetch(`https://api.datamuse.com/words?ml=${encodeURIComponent(word)}`);
-    if (!response.ok) throw new Error('Failed to fetch words.'); // Check response status
+  try {
+    const word = req.query.word || 'water'; // Use a default word if none is provided
+    const response = await fetch(`https://api.datamuse.com/words?ml=${encodeURIComponent(word)}`);
+    if (!response.ok) throw new Error('Failed to fetch words.');
 
-    let data = await response.json();
-    data = data.slice(0, 10);
-    console.log(data);
+    let data = await response.json();
+    data = data.slice(0, 10);
 
-    if (data.length === 0) throw new Error('Word is invalid or no related words found.'); // Validate data
+    if (data.length === 0) throw new Error('Word is invalid or no related words found.');
 
-    const grid = generateGrid(data.map((item) => item.word));
-    console.log(grid);
+    const grid = generateGrid(data.map((item) => item.word));
 
-    res.render('index', { data, grid, error: null }); // Pass null for error when successful
-  } catch (error) {
-    console.error("Error:", error);
-    // Render the same page but with an error message
-    res.render('index', { data: [], grid: [], error: error.message });
-  }
+    res.render('index', { data, grid, error: null });
+  } catch (error) {
+    console.error("Error:", error);
+    res.render('index', { data: [], grid: [], error: error.message });
+  }
 };

@@ -48,9 +48,10 @@
         <h2>Word List:</h2>
         <ul class="word-list">
           <% data.forEach(function(dataItem) { %>
-          <li class="words"><%= dataItem.word %></li>
+          <li class="words" onclick="getDefinition('<%= dataItem.word %>')"><%= dataItem.word %></li>
           <% }) %>
         </ul>
+        <div id="wordDefinition" class="mt-3"></div>
       </div>
       <div class="col-md-6">
         <h2>Word Search Grid:</h2>
@@ -70,55 +71,70 @@
     </div>
   </div>
 <form id="wordSearchForm" action="/" method="get" class="d-none"></form>
-  <script>
-  let selectedLetters = '';
-  let selectedPositions = []; // Keeps track of the row and column indices of selected letters
-  let selectionDirection = null;
+<script>
+let selectedLetters = '';
+let selectedPositions = [];
+let selectionDirection = null;
 
-  function isNeighbor(lastPos, currentPos) {
-    // Check if the current cell is a direct neighbor of the last selected cell
-    const [lastRow, lastCol] = lastPos;
-    const [currRow, currCol] = currentPos;
-    return Math.abs(lastRow - currRow) <= 1 && Math.abs(lastCol - currCol) <= 1;
+function isNeighbor(lastPos, currentPos) {
+  const [lastRow, lastCol] = lastPos;
+  const [currRow, currCol] = currentPos;
+  return Math.abs(lastRow - currRow) <= 1 && Math.abs(lastCol - currCol) <= 1;
+}
+
+function determineDirection(lastPos, currentPos) {
+  if (lastPos[0] === currentPos[0]) return 'horizontal';
+  if (lastPos[1] === currentPos[1]) return 'vertical';
+  if (Math.abs(lastPos[0] - currentPos[0]) === Math.abs(lastPos[1] - currentPos[1])) {
+    return (currentPos[0] - lastPos[0] === currentPos[1] - lastPos[1]) ? 'diagonal-desc' : 'diagonal-asc';
   }
+  return null;
+}
 
-  function determineDirection(lastPos, currentPos) {
-    if (lastPos[0] === currentPos[0]) return 'horizontal';
-    if (lastPos[1] === currentPos[1]) return 'vertical';
-    if (Math.abs(lastPos[0] - currentPos[0]) === Math.abs(lastPos[1] - currentPos[1])) {
-      return (currentPos[0] - lastPos[0] === currentPos[1] - lastPos[1]) ? 'diagonal-desc' : 'diagonal-asc';
-    }
-    return null;
+function updateDirectionIfFirstPair(currentPos) {
+  if (selectedPositions.length === 1) {
+    const lastPos = selectedPositions[0];
+    selectionDirection = determineDirection(lastPos, currentPos);
   }
+}
 
-  function updateDirectionIfFirstPair(currentPos) {
-    if (selectedPositions.length === 1) { // This is the second selection, determine the direction
-      const lastPos = selectedPositions[0];
-      selectionDirection = determineDirection(lastPos, currentPos);
-    }
-  }
-
-  function toggleCell(cell, letter, rowIndex, cellIndex) {
-    const currentPosition = [rowIndex, cellIndex];
-
-    if (selectedPositions.length === 0) {
-      // First selection, no neighbor check required
-      cell.classList.add('selected');
-      selectedLetters += letter;
-      selectedPositions.push(currentPosition);
-    } else {
-      const lastPosition = selectedPositions[selectedPositions.length - 1];
-      if (isNeighbor(lastPosition, currentPosition) && (!selectionDirection || determineDirection(lastPosition, currentPosition) === selectionDirection)) {
-        updateDirectionIfFirstPair(currentPosition); // Determine direction if this is the second selection
-        if (!cell.classList.contains('selected')) {
-          cell.classList.add('selected');
-          selectedLetters += letter;
-          selectedPositions.push(currentPosition);
-        }
+function toggleCell(cell, letter, rowIndex, cellIndex) {
+  const currentPosition = [rowIndex, cellIndex];
+  if (selectedPositions.length === 0) {
+    cell.classList.add('selected');
+    selectedLetters += letter;
+    selectedPositions.push(currentPosition);
+  } else {
+    const lastPosition = selectedPositions[selectedPositions.length - 1];
+    if (isNeighbor(lastPosition, currentPosition) && (!selectionDirection || determineDirection(lastPosition, currentPosition) === selectionDirection)) {
+      updateDirectionIfFirstPair(currentPosition);
+      if (!cell.classList.contains('selected')) {
+        cell.classList.add('selected');
+        selectedLetters += letter;
+        selectedPositions.push(currentPosition);
       }
     }
-    console.log(selectedLetters, selectedPositions, selectionDirection);
   }
+  console.log(selectedLetters, selectedPositions, selectionDirection);
+}
+
+async function getDefinition(word) {
+  const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!response.ok) throw new Error('Failed to fetch definition.');
+    if (data.length > 0 && data[0].meanings.length > 0 && data[0].meanings[0].definitions.length > 0) {
+      const definition = data[0].meanings[0].definitions[0].definition;
+      document.getElementById('wordDefinition').innerHTML = `<strong>Definition of ${word}:</strong> ${definition}`;
+    } else {
+      document.getElementById('wordDefinition').innerHTML = `No definition found for ${word}.`;
+    }
+  } catch (error) {
+    console.error("Error fetching definition:", error);
+    document.getElementById('wordDefinition').innerHTML = `Error fetching definition for ${word}.`;
+  }
+}
 
  function submitWord() {
   let wordFound = false;
@@ -146,16 +162,12 @@
   }
 }
 
-
-  function clearSelection() {
-    console.log("cleared");
-    selectedLetters = '';
-    selectedPositions = [];
-    selectionDirection = null;
-    document.querySelectorAll('.selected').forEach(cell => cell.classList.remove('selected'));
-  }
-    
+function clearSelection() {
+  selectedLetters = '';
+  selectedPositions = [];
+  selectionDirection = null;
+  document.querySelectorAll('.selected').forEach(cell => cell.classList.remove('selected'));
+}
 </script>
-
 </body>
 </html>
