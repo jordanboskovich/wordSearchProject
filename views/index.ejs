@@ -16,6 +16,10 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
+    .found {
+      background-color: green;
+      color: white;
+    }
     .selected {
       background-color: #007bff;
       color: white;
@@ -29,8 +33,8 @@
       <div class="col-md-6">
         <h2>Word List:</h2>
         <ul class="word-list">
-          <% data.forEach(function(data) { %>
-            <li><%= data.word %></li>
+          <% data.forEach(function(dataItem) { %>
+          <li class="words"><%= dataItem.word %></li>
           <% }) %>
         </ul>
       </div>
@@ -38,67 +42,106 @@
         <h2>Word Search Grid:</h2>
         <table class="word-search-grid">
           <% grid.forEach(function(row, rowIndex) { %>
-            <tr>
-              <% row.forEach(function(cell, cellIndex) { %>
-                <td onclick="selectLetter(this, '<%= cell %>', <%= rowIndex %>, <%= cellIndex %>)" 
-                    id="cell-<%= rowIndex %>-<%= cellIndex %>"><%= cell %></td>
-              <% }) %>
-            </tr>
+          <tr>
+            <% row.forEach(function(cell, cellIndex) { %>
+            <td onclick="toggleCell(this, '<%= cell %>', <%= rowIndex %>, <%= cellIndex %>)" 
+                class="cell" id="cell-<%= rowIndex %>-<%= cellIndex %>"><%= cell %></td>
+            <% }) %>
+          </tr>
           <% }) %>
         </table>
+        <button onclick="submitWord()" class="btn btn-success mt-3">Submit</button>
+        <button onclick="clearSelection()" class="btn btn-warning mt-3">Clear</button>
       </div>
-  <!-- Form for searching words -->
-  <div class="row align-items-end">
-    <div class="col-sm-9">
-      <input type="text" class="form-control" id="word" name="word" placeholder="Type a word" form="wordSearchForm">
     </div>
-    <div class="col-sm-3">
-      <button type="submit" class="btn btn-primary" form="wordSearchForm">Search</button>
-    </div>
-    <button onclick="submitWord()">Submit</button>
-    <button onclick="clearSelection()">Clear</button>
   </div>
+
   <script>
-    let selectedLetters = '';
-    let lastSelectedCell = null;
+  let selectedLetters = '';
+  let selectedPositions = []; // Keeps track of the row and column indices of selected letters
+  let selectionDirection = null;
 
-    function isNeighbor(rowIndex, cellIndex) {
-      if (lastSelectedCell === null) return true;
-      const [lastRow, lastCell] = lastSelectedCell;
-      const rowDiff = Math.abs(lastRow - rowIndex);
-      const cellDiff = Math.abs(lastCell - cellIndex);
-      return rowDiff <= 1 && cellDiff <= 1;
+  function isNeighbor(lastPos, currentPos) {
+    // Check if the current cell is a direct neighbor of the last selected cell
+    const [lastRow, lastCol] = lastPos;
+    const [currRow, currCol] = currentPos;
+    return Math.abs(lastRow - currRow) <= 1 && Math.abs(lastCol - currCol) <= 1;
+  }
+
+  function determineDirection(lastPos, currentPos) {
+    if (lastPos[0] === currentPos[0]) return 'horizontal';
+    if (lastPos[1] === currentPos[1]) return 'vertical';
+    if (Math.abs(lastPos[0] - currentPos[0]) === Math.abs(lastPos[1] - currentPos[1])) {
+      return (currentPos[0] - lastPos[0] === currentPos[1] - lastPos[1]) ? 'diagonal-desc' : 'diagonal-asc';
     }
+    return null;
+  }
 
-    function selectLetter(cell, letter, rowIndex, cellIndex) {
-      if (isNeighbor(rowIndex, cellIndex) || selectedLetters.length === 0) {
-        if (cell.classList.contains('selected')) {
-          cell.classList.remove('selected');
-          selectedLetters = selectedLetters.replace(letter, '');
-        } else {
+  function updateDirectionIfFirstPair(currentPos) {
+    if (selectedPositions.length === 1) { // This is the second selection, determine the direction
+      const lastPos = selectedPositions[0];
+      selectionDirection = determineDirection(lastPos, currentPos);
+    }
+  }
+
+  function toggleCell(cell, letter, rowIndex, cellIndex) {
+    const currentPosition = [rowIndex, cellIndex];
+
+    if (selectedPositions.length === 0) {
+      // First selection, no neighbor check required
+      cell.classList.add('selected');
+      selectedLetters += letter;
+      selectedPositions.push(currentPosition);
+    } else {
+      const lastPosition = selectedPositions[selectedPositions.length - 1];
+      if (isNeighbor(lastPosition, currentPosition) && (!selectionDirection || determineDirection(lastPosition, currentPosition) === selectionDirection)) {
+        updateDirectionIfFirstPair(currentPosition); // Determine direction if this is the second selection
+        if (!cell.classList.contains('selected')) {
           cell.classList.add('selected');
           selectedLetters += letter;
-          lastSelectedCell = [rowIndex, cellIndex];
+          selectedPositions.push(currentPosition);
         }
-        console.log(selectedLetters);
       }
     }
+    console.log(selectedLetters, selectedPositions, selectionDirection);
+  }
 
-    async function submitWord() {
-      console.log("Submitting:", selectedLetters);
-      // Implement submission logic here...
-      // Reset after submission for demonstration
-      selectedLetters = '';
-      lastSelectedCell = null;
-      document.querySelectorAll('.selected').forEach(cell => cell.classList.remove('selected'));
-    }
+ function submitWord() {
+  let wordFound = false;
 
-    function clearSelection() {
+  // Assuming 'data' is an array of words you are working with
+  document.querySelectorAll('.words').forEach(function(wordElement) {
+    const wordText = wordElement.textContent || wordElement.innerText;
+    if (wordText.toUpperCase() === selectedLetters.toUpperCase()) {
+      // If a matching word is found, you might want to mark it visually
+      wordElement.style.textDecoration = "line-through";
+      wordFound = true;
+      // Optionally, leave the selected letters highlighted but clear the tracking variables
       selectedLetters = '';
-      lastSelectedCell = null;
+      selectedPositions = [];
+      selectionDirection = null;
+      document.querySelectorAll('.selected').forEach(cell => cell.classList.add('found'));
       document.querySelectorAll('.selected').forEach(cell => cell.classList.remove('selected'));
-      console.log("Cleared selection");
+      
     }
-  </script>
+  });
+
+  if (!wordFound) {
+    // If no matching word was found after checking all, then clear the selection
+    clearSelection();
+  }
+}
+
+
+  function clearSelection() {
+    console.log("cleared");
+    selectedLetters = '';
+    selectedPositions = [];
+    selectionDirection = null;
+    document.querySelectorAll('.selected').forEach(cell => cell.classList.remove('selected'));
+  }
+    
+</script>
+
 </body>
 </html>
