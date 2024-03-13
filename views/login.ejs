@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+</head>
+<body class="login2">
+    <% if (flashMessages.info) { %>
+    <div class="alert alert-info" id = "info-alert">
+      <%= flashMessages.info %>
+    </div>
+  <% } %>
+    
+    
+    
+    <% if (flashMessages.error) { %>
+    <div class="alert alert-danger" id = "info-alert">
+      <%= flashMessages.error %>
+    </div>
+  <% } %>
+    
+    
+    <% if (flashMessages.warning) { %>
+    <div class="alert alert-info" id = "info-alert">
+      <%= flashMessages.warning %>
+    </div>
+  <% } %>
+    <h1 class="login"><strong>Log In</strong></h1>
+    
+  <form class="login-form"action="/login" method="POST">
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit">Login</button>
+  </form>
+  <p class="acc">Don't have an account? <a href="/register">Register here</a></p>
+    
+    
+    
+    
+</body>
+</html>

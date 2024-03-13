@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    
+    <% if (flashMessages.info) { %>
+    <div class="alert alert-info" id = "info-alert">
+      <%= flashMessages.info %>
+    </div>
+  <% } %>
+    
+    <% if (flashMessages.warning) { %>
+    <div class="alert alert-info" id = "info-alert">
+      <%= flashMessages.warning %>
+    </div>
+  <% } %>
+  <h1 class="login"><strong>Register</strong></h1>
+  <form class="login-form"action="/register" method="POST">
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit">Register</button>
+  </form>
+  <p class="acc">Already have an account? <a href="/login">Login here</a></p>
+</body>
+</html>
