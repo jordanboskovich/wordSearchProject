@@ -1,41 +1,72 @@
 const generateGrid = (words) => {
-  const grid = [];
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; // Letters to fill the grid with
-  
-  // Initialize the grid with random letters
-  for (let i = 0; i < 15; i++) {
-    const row = [];
-    for (let j = 0; j < 15; j++) {
-      row.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
-    }
-    grid.push(row);
-  }
+  const grid = [];
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  
+  // Initialize the grid with placeholder characters
+  for (let i = 0; i < 15; i++) {
+    const row = [];
+    for (let j = 0; j < 15; j++) {
+      row.push('-'); // Placeholder for empty cells
+    }
+    grid.push(row);
+  }
 
-  // Place words in the grid
-  words.forEach((word) => {
-    // Randomly choose direction: 0 for horizontal, 1 for vertical, 2 for diagonal
-    const direction = Math.floor(Math.random() * 3);
-    const startRow = Math.floor(Math.random() * (15 - word.length + 1));
-    const startCol = Math.floor(Math.random() * (15 - word.length + 1));
+  // Helper function to check if the word can be placed
+  const canPlaceWord = (startRow, startCol, word, direction) => {
+    if (direction === 0 && startCol + word.length > 15) return false; // Horizontal check
+    if (direction === 1 && startRow + word.length > 15) return false; // Vertical check
+    if (direction === 2 && (startRow + word.length > 15 || startCol + word.length > 15)) return false; // Descending diagonal check
+    if (direction === 3 && (startRow - word.length < -1 || startCol + word.length > 15)) return false; // Ascending diagonal check
 
-    if (direction === 0) { // Horizontal
-      for (let i = 0; i < word.length; i++) {
-        grid[startRow][startCol + i] = word[i].toUpperCase();
-      }
-    } else if (direction === 1) { // Vertical
-      for (let i = 0; i < word.length; i++) {
-        grid[startRow + i][startCol] = word[i].toUpperCase();
-      }
-    } else { // Diagonal
-      // Ensure there's enough space diagonally; adjust startRow/startCol if necessary
-      for (let i = 0; i < word.length; i++) {
-        grid[startRow + i][startCol + i] = word[i].toUpperCase();
-      }
-    }
-  });
+    for (let i = 0; i < word.length; i++) {
+      const row = startRow + (direction === 1 ? i : direction === 2 ? i : direction === 3 ? -i : 0);
+      const col = startCol + (direction === 0 ? i : direction === 2 || direction === 3 ? i : 0);
 
-  return grid;
+      if (grid[row][col] !== '-') return false; // Cell is not empty
+    }
+    return true;
+  };
+
+  // Helper function to place the word
+  const placeWord = (startRow, startCol, word, direction) => {
+    for (let i = 0; i < word.length; i++) {
+      const row = startRow + (direction === 1 ? i : direction === 2 ? i : direction === 3 ? -i : 0);
+      const col = startCol + (direction === 0 ? i : direction === 2 || direction === 3 ? i : 0);
+      grid[row][col] = word[i].toUpperCase();
+    }
+  };
+
+  // Place each word
+  words.forEach(word => {
+    let placed = false;
+    const direction = Math.floor(Math.random() * 4); // Including ascending diagonal as a direction
+    while (!placed) {
+      const startRow = direction === 3 ? Math.floor(Math.random() * (14 - word.length)) + word.length : Math.floor(Math.random() * (15 - word.length));
+      const startCol = Math.floor(Math.random() * (15 - word.length));
+
+      if (canPlaceWord(startRow, startCol, word, direction)) {
+        placeWord(startRow, startCol, word, direction);
+        placed = true;
+      }
+    }
+
+    if (!placed) console.log(`Failed to place word: ${word}`);
+  });
+
+  // Fill empty cells with random letters
+  for (let i = 0; i < 15; i++) {
+    for (let j = 0; j < 15; j++) {
+      if (grid[i][j] === '-') {
+        grid[i][j] = alphabet[Math.floor(Math.random() * alphabet.length)];
+      }
+    }
+  }
+
+  return grid;
 };
+
+
+
 
 export const renderPage = async (req, res) => {
   try {
