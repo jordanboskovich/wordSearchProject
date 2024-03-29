@@ -30,9 +30,11 @@ export const verifyRegister = async (req, res) => {
     res.redirect('/login');
   } catch (error) {
       
-// req.flash('warning', "User name has been taken." );  
-    res.send(error.message);
-      res.redirect('/register');
+      
+      console.log("hi");
+      
+req.flash('warning', "User name has been taken." );  
+      res.render("register");
   }
 };
 

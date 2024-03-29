@@ -3,7 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import session from 'express-session'; // Add session import
-import flash from 'express-flash'; // Move flash import
+import flash from 'connect-flash'; // Move flash import
 import routes from './routes/routes.js';
 import configurePassport from './config/passport.js';
 import passport from 'passport';
